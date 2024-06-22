@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { UserSchema } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { ICreateUserDto, IUser } from './types/user.type';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectModel(UserSchema.name) private userModel: Model<UserSchema>,
+  ) {}
+
+  async create(createUserDto: CreateUserDto): Promise<Partial<IUser>> {
+    const createdUser = new this.userModel(createUserDto);
+    const savedUser = await createdUser.save();
+    if (!savedUser) throw new Error('User not created');
+    return savedUser;
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(): Promise<Partial<IUser>[]> {
+    return await this.userModel.find().exec();
+  }
+  async findOne(id: number): Promise<Partial<IUser>> {
+    return await this.userModel.findById(id).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Partial<IUser>> {
+    return await this.userModel.findByIdAndUpdate(id, updateUserDto).exec();
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  //Should I retrun deleted user?
+  async remove(id: number): Promise<void> {
+    await this.userModel.findByIdAndDelete(id).exec();
   }
 }
