@@ -8,9 +8,7 @@ import { ICreateUserDto, IUser } from './types/user.type';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(UserSchema.name) private userModel: Model<UserSchema>,
-  ) {}
+  constructor(@InjectModel('User') private readonly userModel: Model<IUser>) {}
 
   async create(createUserDto: CreateUserDto): Promise<Partial<IUser>> {
     const createdUser = new this.userModel(createUserDto);
