@@ -1,16 +1,28 @@
-import * as mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 import { UserStatus } from '../enums/user.enums';
+import { Exclude } from 'class-transformer';
 
-export const UserSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
-  username: { type: String, required: true },
-  email: { type: String, required: true },
-  password: { type: String, required: true },
-  userStatus: {
-    type: String,
-    enum: Object.values(UserStatus),
-    default: UserStatus.Active,
-  },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+export type CatDocument = HydratedDocument<UserSchema>;
+
+@Schema()
+export class UserSchema {
+  @Prop({ required: true })
+  username: string;
+
+  @Prop({ required: true })
+  email: string;
+
+  @Exclude()
+  @Prop({ required: true })
+  password: string;
+
+  @Prop({ enum: Object.values(UserStatus), default: UserStatus.Active })
+  userStatus: UserStatus;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop({ default: Date.now })
+  updatedAt: Date;
+}
